@@ -21,16 +21,24 @@ $( function() {
 
 	$container.append(renderer.domElement);
 
+	/* SHADER ATTRIBUTES */
+	var uniforms = {
+	    resolution: {
+	        type: 'vec2',
+	        value: {x: WIDTH, y: HEIGHT}
+	    }
+	};
+
 	/* LOADING SHADERS */
 	var shaderMaterial = new THREE.ShaderMaterial({
 	    vertexShader:   $('#vertexshader').text(),
 	    fragmentShader: $('#fragmentshader').text(),
+	    uniforms: uniforms,
 	    depthWrite: false,
 		depthTest: false
 	});
 
 	/* FULLSCREEN QUAD */
-
 	var quad = new THREE.Mesh(
 		new THREE.PlaneGeometry(2, 2),
 		shaderMaterial
