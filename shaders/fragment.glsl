@@ -11,12 +11,16 @@ uniform vec3 u_point_lights_position[@var(num_point_lights)];
 uniform vec3 u_point_lights_color[@var(num_point_lights)];
 
 const float float_epsilon = 0.0001;
-const int maxSteps = 32;
+const int maxSteps = 128;
 
+@import(shaders/lib/transformations.glsl)
 @import(shaders/lib/primitives.glsl)
 
 float distanceField(vec3 p) {
-    return spherePrimitive(p, (0.5));
+    float sphere = spherePrimitive(p, 1.0);
+    float ground = boxPrimitive(p, vec3(0.7));
+
+    return transformUnion(sphere, ground);
 }
 
 vec3 calcNormal(vec3 pos) {
@@ -62,7 +66,7 @@ void main() {
     vec3 cameraRight = normalize(cross(upDirection, cameraOrigin));
     vec3 cameraUp = cross(cameraDir, cameraRight);
 
-    vec2 screenPos = -1.0 + 2.0 * gl_FragCoord.xy / u_resolution.xy;
+    vec2 screenPos = 1.0 - 2.0 * gl_FragCoord.xy / u_resolution.xy;
     screenPos.x *= u_resolution.x / u_resolution.y;
 
     vec3 rayDir = normalize(cameraRight * screenPos.x + cameraUp * screenPos.y + cameraDir);
