@@ -19,7 +19,39 @@
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <div id="main-screen"></div>
+        <div class="pane">
+            <div id="main-screen"></div>
+        </div>
+
+        <div class="pane">
+            <div class="shaders">
+                
+                <h3>Vertex shader</h3>
+                <pre id="vertexshader" class="shader">
+varying vec2 vUv;
+
+void main() {
+    vUv = uv;
+    gl_Position = vec4(position, 1.0);
+}
+                </pre>
+
+                <h3>Fragment shader</h3>
+                <pre id="fragmentshader" class="shader">
+/**
+ * Set the colour to a lovely pink.
+ * Note that the color is a 4D Float
+ * Vector, R,G,B and A and each part
+ * runs from 0.0 to 1.0
+ */
+void main() {
+    gl_FragColor = vec4(1.0, 0.0, 1.0, 1.0);
+}
+                </pre>
+            </div>
+        </div>
+
+        <div style="clear: both;"></div>
 
         <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.0.min.js"><\/script>')</script>

@@ -95,9 +95,14 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+.pane {
+    float: left;
+    width: 50%;
+}
 
-
-
+.shader {
+    font-size: 14px;
+}
 
 
 
