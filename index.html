@@ -19,63 +19,17 @@
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <div class="pane">
-            <div id="main-screen"></div>
-        </div>
-
-        <div class="pane">
-            <div class="shaders">
-                
-                <h3>Vertex shader</h3>
-                <pre id="vertexshader" class="shader">
-void main() {
-    gl_Position = vec4(position, 1.0);
-}
-                </pre>
-
-                <h3>Fragment shader</h3>
-                <pre id="fragmentshader" class="shader">
-uniform vec2 resolution;
-
-void main() {
-    float g_rmEpsilon = 0.0001;
-    vec3 eye = vec3(0, 0, -1);
-    vec3 up = vec3(0, 1, 0);
-    vec3 right = vec3(1, 0, 0);
-
-    float u = gl_FragCoord.x * 2.0 / resolution.x - 1.0;
-    float v = gl_FragCoord.y * 2.0 / resolution.y - 1.0;
-    vec3 ro = right * u + up * v;
-    vec3 rd = normalize(cross(right, up));
-
-    vec4 color = vec4(0.0); // Sky color
-
-    float t = 0.0;
-    const int maxSteps = 32;
-    for(int i = 0; i < maxSteps; ++i)
-    {
-        vec3 p = ro + rd * t;
-        float d = length(p) - 0.5; // Distance to sphere of radius 0.5
-        if(d < g_rmEpsilon)
-        {
-            color = vec4(1.0); // Sphere color
-            break;
-        }
-
-        t += d;
-    }
-
-    gl_FragColor = color;
-}
-                </pre>
-            </div>
-        </div>
-
-        <div style="clear: both;"></div>
+        <div id="main-screen"></div>
 
         <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.0.min.js"><\/script>')</script>
         <script src="js/vendor/three.min.js"></script>
-        <script src="js/main.js"></script>
+        <script src="js/ShaderRenderer.js"></script>
+        
+        <script>
+            $( function() {
+                var renderer = new ShaderRenderer('main-screen', 600, 600, 'js/shader.vert', 'js/shader.frag');
+            });
+        </script>
     </body>
 </html>
