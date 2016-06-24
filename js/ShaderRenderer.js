@@ -21,10 +21,19 @@ var ShaderRenderer = function() {
 		this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 1000);
 		this.scene = new THREE.Scene();
 
-		/* Init shader constants as uniforms */
+		this.custom_shader_variables = {
+			num_point_lights: 0
+		};
+
+		/* Init shader data as uniforms */
 		this.uniforms = {
 		    u_resolution: { type: 'vec2', value: {x: this.width, y: this.height} },
-		    u_fov: { type: 'f', value: 1 }
+		    u_fov: { type: 'f', value: 1 },
+
+		    u_ambiant_color: { type: 'vec3', value: {x: 0.1, y: 0.1, z: 0.15} },
+
+		    u_point_lights_position: { type: 'v3v', value: []},
+		    u_point_lights_color: { type: 'v3v', value: []},
 		};
 
 		/* Init shader material */
@@ -42,6 +51,13 @@ var ShaderRenderer = function() {
 			this.shaderMaterial
 		);
 		this.scene.add(this.quad);
+	}
+
+	this.addPointLight = function(position, color) {
+		this.uniforms.u_point_lights_position.value.push(position);
+		this.uniforms.u_point_lights_color.value.push(color);
+
+		this.custom_shader_variables.num_point_lights += 1;
 	}
 
 	this.loadFile = function(file_path, done_callback) {
@@ -65,7 +81,7 @@ var ShaderRenderer = function() {
 		}
 
 		/* Parse @import directive */
-		var import_match = shader_code.match(/\@import\s*\(\s*(.+)\s*\)/i);
+		var import_match = shader_code.match(/\@import\s*\(\s*([^)]+)\s*\)/i);
 		if( import_match ) {
 			var directive_length = import_match[0].length;
 			var directive_file = import_match[1];
@@ -83,6 +99,22 @@ var ShaderRenderer = function() {
 			return;
 		}
 
+		/* Parse @var directive */
+		var var_match = shader_code.match(/\@var\s*\(\s*([^)]+)\s*\)/i);
+		if( var_match ) {
+			var directive_length = var_match[0].length;
+			var directive_var_name = var_match[1];
+			var directive_index = var_match.index;
+			
+			shader_code = shader_code.substring(0, directive_index) + 
+				this.custom_shader_variables[directive_var_name] + 
+				shader_code.substring(directive_index + directive_length);
+
+			this.parseDistanceShader(shader_code, done_callback, recursion_level + 1);
+
+			return;
+		}
+
 		/* Remove eventual non ascii characters in the shader code */
 		shader_code = shader_code.replace(/[^\x00-\x7F]/g, "");
 
@@ -92,7 +124,7 @@ var ShaderRenderer = function() {
 		}
 	}
 
-	this.loadFragmentShader = function(fragment_shader_file) {
+	this.compileShader = function(fragment_shader_file) {
 		var that = this;
 
 		this.loadFile(fragment_shader_file, function(fragment_data) {

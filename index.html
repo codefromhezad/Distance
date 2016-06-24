@@ -31,7 +31,17 @@
                 window.renderer = new ShaderRenderer();
 
                 renderer.init('main-screen', 600, 600);
-                renderer.loadFragmentShader('shaders/fragment.glsl');
+
+                renderer.addPointLight(
+                    new THREE.Vector3(2.0, 2.0, -2.0),
+                    new THREE.Vector3(0.7, 0.7, 0.85)
+                );
+                renderer.addPointLight(
+                    new THREE.Vector3(-2.0, 0.0, -2.0),
+                    new THREE.Vector3(0.7, 0.55, 0.5)
+                );
+                
+                renderer.compileShader('shaders/fragment.glsl');
             });
         </script>
     </body>
