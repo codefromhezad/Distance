@@ -23,9 +23,13 @@ var ShaderRenderer = function(screen_id, width, height, vertex_file, fragment_fi
 
 	/* SHADER ATTRIBUTES */
 	this.uniforms = {
-	    resolution: {
+	    u_resolution: {
 	        type: 'vec2',
 	        value: {x: this.width, y: this.height}
+	    },
+	    u_fov: {
+	    	type: 'f',
+	    	value: 1
 	    }
 	};
 
