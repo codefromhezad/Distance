@@ -19,7 +19,7 @@
             <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
 
-        <div id="main-screen"></div>
+        <canvas id="main-screen"></canvas>
 
         <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.0.min.js"><\/script>')</script>
@@ -28,7 +28,10 @@
         
         <script>
             $( function() {
-                var renderer = new ShaderRenderer('main-screen', 600, 600, 'js/shader.vert', 'js/shader.frag');
+                window.renderer = new ShaderRenderer();
+
+                renderer.init('main-screen', 600, 600);
+                renderer.loadFragmentShader('shaders/fragment.glsl');
             });
         </script>
     </body>
