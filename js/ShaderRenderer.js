@@ -21,16 +21,38 @@ var ShaderRenderer = function() {
 		this.camera = new THREE.PerspectiveCamera(45, this.width / this.height, 1, 1000);
 		this.scene = new THREE.Scene();
 
+		/* To help with arrays and for loops in the shader code :
+		 * At compile time, arrays of uniforms must have a constant size,
+		 * so we'll parse the shader file and write the expected size directly
+		 * in the shader code before compiling it. 
+		 * It's a limitation of some GLSL implementations I believe but
+		 * I may be utterly wrong, I didn't tinker with shaders in a
+		 * long time. And it was funny to use kind-of templating
+		 * tags in a GLSL source code. It's visible in shaders/fragment.glsl :
+		 * - @import(file) will load a file via ajax and replace the @import statement with
+		 *   the file contents.
+		 * - @var(var_name) will replace the statement with a value from the next object :
+		 */
 		this.custom_shader_variables = {
 			num_point_lights: 0
 		};
 
-		/* Init shader data as uniforms */
+		/* Init/setup shader data as uniforms */
 		this.uniforms = {
-		    u_resolution: { type: 'vec2', value: {x: this.width, y: this.height} },
-		    u_fov: { type: 'f', value: 1 },
 
-		    u_ambiant_color: { type: 'vec3', value: {x: 0.1, y: 0.1, z: 0.15} },
+			/* Aspect uniforms */
+		    u_resolution: { type: 'vec2', value: {x: this.width, y: this.height}},
+		    
+		    /* Camera uniforms */
+		    u_camera_position: { type: 'vec3', value: {x: 0.0, y: 2.0, z: -2.0}},
+		    u_camera_look_at: { type: 'vec3', value: {x: 0.0, y: 0.0, z: 0.0}},
+		    u_camera_up: { type: 'vec3', value: {x: 0.0, y: 1.0, z: 0.0}},
+
+		    /* World lighting uniforms */
+		    u_background_color: { type: 'vec3', value: {x: 0.05, y: 0.04, z: 0.03}},
+
+		    /* Actual lighting uniforms */
+		    u_ambiant_light: { type: 'vec3', value: {x: 0.1, y: 0.1, z: 0.15} },
 
 		    u_point_lights_position: { type: 'v3v', value: []},
 		    u_point_lights_color: { type: 'v3v', value: []},
@@ -58,6 +80,20 @@ var ShaderRenderer = function() {
 		this.uniforms.u_point_lights_color.value.push(color);
 
 		this.custom_shader_variables.num_point_lights += 1;
+	}
+
+	this.setCamera = function(conf) {
+		if( conf.position ) {
+			this.uniforms.u_camera_position.value = conf.position;
+		}
+
+		if( conf.look_at ) {
+			this.uniforms.u_camera_look_at.value = conf.look_at;
+		}
+		
+		if( conf.up ) {
+			this.uniforms.u_camera_up.value = conf.up;
+		}
 	}
 
 	this.loadFile = function(file_path, done_callback) {

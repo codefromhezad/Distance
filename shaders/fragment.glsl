@@ -1,7 +1,12 @@
 uniform vec2 u_resolution;
-uniform float u_fov;
 
-uniform vec3 u_ambiant_color;
+uniform vec3 u_camera_position;
+uniform vec3 u_camera_look_at;
+uniform vec3 u_camera_up;
+
+uniform vec3 u_ambiant_light;
+uniform vec3 u_background_color;
+
 uniform vec3 u_point_lights_position[@var(num_point_lights)];
 uniform vec3 u_point_lights_color[@var(num_point_lights)];
 
@@ -11,7 +16,7 @@ const int maxSteps = 32;
 @import(shaders/lib/primitives.glsl)
 
 float distanceField(vec3 p) {
-    return spherePrimitive(p, 0.6);
+    return spherePrimitive(p, (0.5));
 }
 
 vec3 calcNormal(vec3 pos) {
@@ -44,34 +49,42 @@ vec3 calcLightEquation(vec3 fieldPos) {
         diffuseContribution = diffuseContribution + lightColor * diffuse;
     }
 
-    return u_ambiant_color + diffuseContribution;
+    // Return Diffuse + Ambiant Contributions
+    return u_ambiant_light + diffuseContribution;
 }
 
 void main() {
-    vec3 eye = vec3(0.0, 0.0, -1);
-    vec3 up = vec3(0, 1.0, 0.0);
-    vec3 right = vec3(1.0, 0.0, 0.0);
+    vec3 cameraOrigin = u_camera_position;
+    vec3 cameraTarget = u_camera_look_at;
+    vec3 upDirection = u_camera_up;
 
-    float u = gl_FragCoord.x * 2.0 / u_resolution.x - 1.0;
-    float v = gl_FragCoord.y * 2.0 / u_resolution.y - 1.0;
-    vec3 ro = right * u + up * v;
-    vec3 rd = normalize(cross(right, up));
+    vec3 cameraDir = normalize(cameraTarget - cameraOrigin);
+    vec3 cameraRight = normalize(cross(upDirection, cameraOrigin));
+    vec3 cameraUp = cross(cameraDir, cameraRight);
 
-    vec4 color = vec4(0.0); // Sky color
+    vec2 screenPos = -1.0 + 2.0 * gl_FragCoord.xy / u_resolution.xy;
+    screenPos.x *= u_resolution.x / u_resolution.y;
 
-    float t = 0.0;
+    vec3 rayDir = normalize(cameraRight * screenPos.x + cameraUp * screenPos.y + cameraDir);
+
+    vec3 color = u_background_color;
+
+    float total_dist = 0.0;
     
+    vec3 p = cameraOrigin;
+
     for(int i = 0; i < maxSteps; ++i) {
-        vec3 p = eye + ro + rd * u_fov * t;
+        
         float d = distanceField(p);
 
         if(d < float_epsilon) {
-            color = vec4(calcLightEquation(p), 1.0);
+            color = calcLightEquation(p);
             break;
         }
 
-        t += d;
+        total_dist += d;
+        p += d * rayDir;
     }
 
-    gl_FragColor = color;
+    gl_FragColor = vec4(color, 1.0);
 }

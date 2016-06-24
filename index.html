@@ -32,6 +32,11 @@
 
                 renderer.init('main-screen', 600, 600);
 
+                renderer.setCamera({
+                    position: {x: 0.0, y: 2.0, z: -2.0},
+                    look_at: {x: 0.0, y: 0.0, z: 0.0}
+                });
+
                 renderer.addPointLight(
                     new THREE.Vector3(2.0, 2.0, -2.0),
                     new THREE.Vector3(0.7, 0.7, 0.85)
@@ -40,7 +45,7 @@
                     new THREE.Vector3(-2.0, 0.0, -2.0),
                     new THREE.Vector3(0.7, 0.55, 0.5)
                 );
-                
+
                 renderer.compileShader('shaders/fragment.glsl');
             });
         </script>
