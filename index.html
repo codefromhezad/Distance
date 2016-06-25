@@ -11,6 +11,8 @@
         <!-- Place favicon.ico in the root directory -->
 
         <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="js/vendor/codemirror/lib/codemirror.css">
+        <link rel="stylesheet" href="js/vendor/codemirror/theme/monokai.css">
         <link rel="stylesheet" href="css/main.css">
         <script src="js/vendor/modernizr-2.8.3.min.js"></script>
     </head>
@@ -21,7 +23,8 @@
 
         <canvas id="main-screen"></canvas>
 
-        <textarea id="distant-field-code">
+        <div class="code-zone">
+            <textarea id="distant-field-code">
 float distanceField(vec3 p) {
     vec3 c = vec3(2.0);
     vec3 q = mod(p,c)-0.5*c;
@@ -31,12 +34,48 @@ float distanceField(vec3 p) {
     
     return transformSubtraction(sphere, ground);
 }
-        </textarea>
+            </textarea>
 
-        <button class="render-button">Render</button>
+            <button class="render-button">Render</button>
+        </div>
+
+        <div class="reminders">
+            <h2>Domain operations/transformations</h2>
+
+            <h3>Repetition</h3>
+
+<pre>
+float opRep( vec3 p, vec3 c )
+{
+    vec3 q = mod(p,c)-0.5*c;
+    return primitve( q );
+}
+</pre>
+    
+            <h3>Rotation/Translation</h3>
+
+<pre>
+vec3 opTx( vec3 p, mat4 m )
+{
+    vec3 q = invert(m)*p;
+    return primitive(q);
+}
+</pre>
+
+            <h3>Scale</h3>
+
+<pre>
+float opScale( vec3 p, float s )
+{
+    return primitive(p/s)*s;
+}
+</pre>
+        </div>
 
         <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.0.min.js"><\/script>')</script>
+        <script src="js/vendor/codemirror/lib/codemirror.js"></script>
+        <script src="js/vendor/codemirror/mode/clike/clike.js"></script>
         <script src="js/vendor/three.min.js"></script>
         <script src="js/ShaderRenderer.js"></script>
         
@@ -64,12 +103,21 @@ float distanceField(vec3 p) {
 
                 renderer.compile();
 
+                var editor = CodeMirror.fromTextArea($('#distant-field-code')[0], {
+                    lineNumbers: true,
+                    mode: "clike",
+                    theme: 'monokai'
+                });
+
                 $('.render-button').on('click', function(e) {
                     e.preventDefault();
 
+                    var v = editor.getValue();
+                    $('#distant-field-code').val(v);
+                    
                     renderer.setDistantFieldFunction($('#distant-field-code').val());
                     renderer.compile();
-                    
+
                     return false;
                 });
             });
