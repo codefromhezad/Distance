@@ -8,6 +8,7 @@ var ShaderRenderer = function() {
 		this.width = width;
 		this.height= height;
 		this.canvas = document.getElementById(screen_id);
+		this.fragment_shader_file = "shaders/fragment.glsl";
 
 		if( this.canvas.length == 0 ) {
 			console.error("Can't find any canvas with id '"+screen_id+"'");
@@ -26,15 +27,14 @@ var ShaderRenderer = function() {
 		 * so we'll parse the shader file and write the expected size directly
 		 * in the shader code before compiling it. 
 		 * It's a limitation of some GLSL implementations I believe but
-		 * I may be utterly wrong, I didn't tinker with shaders in a
-		 * long time. And it was funny to use kind-of templating
+		 * I may be utterly wrong, I haven't tinkered with shaders for a
+		 * long time. And it was actually funny to use kind-of templating
 		 * tags in a GLSL source code. It's visible in shaders/fragment.glsl :
-		 * - @import(file) will load a file via ajax and replace the @import statement with
-		 *   the file contents.
 		 * - @var(var_name) will replace the statement with a value from the next object :
 		 */
 		this.custom_shader_variables = {
-			num_point_lights: 0
+			num_point_lights: 0,
+			distant_field_function: ''
 		};
 
 		/* Init/setup shader data as uniforms */
@@ -82,6 +82,10 @@ var ShaderRenderer = function() {
 		this.custom_shader_variables.num_point_lights += 1;
 	}
 
+	this.setDistantFieldFunction = function(distant_field_shader_code) {
+		this.custom_shader_variables.distant_field_function = distant_field_shader_code;
+	}
+
 	this.setCamera = function(conf) {
 		if( conf.position ) {
 			this.uniforms.u_camera_position.value = conf.position;
@@ -116,24 +120,6 @@ var ShaderRenderer = function() {
 			return;
 		}
 
-		/* Parse @import directive */
-		var import_match = shader_code.match(/\@import\s*\(\s*([^)]+)\s*\)/i);
-		if( import_match ) {
-			var directive_length = import_match[0].length;
-			var directive_file = import_match[1];
-			var directive_index = import_match.index;
-			
-			var that = this;
-			this.loadFile(directive_file, function(imported_data) {
-				shader_code = shader_code.substring(0, directive_index) + 
-					imported_data + 
-					shader_code.substring(directive_index + directive_length);
-
-				that.parseDistanceShader(shader_code, done_callback, recursion_level + 1);
-			});
-
-			return;
-		}
 
 		/* Parse @var directive */
 		var var_match = shader_code.match(/\@var\s*\(\s*([^)]+)\s*\)/i);
@@ -160,20 +146,16 @@ var ShaderRenderer = function() {
 		}
 	}
 
-	this.compileShader = function(fragment_shader_file) {
+	this.compile = function() {
 		var that = this;
 
-		this.loadFile(fragment_shader_file, function(fragment_data) {
+		this.loadFile(this.fragment_shader_file, function(fragment_data) {
 			that.parseDistanceShader(fragment_data, function(parsed_fragment) {
 				that.shaderMaterial.fragmentShader = parsed_fragment;
 				that.shaderMaterial.needsUpdate = true;
 
-				that.render();
+				that.renderer.render(that.scene, that.camera);
 			});
 		});
-	}
-
-	this.render = function() {
-		this.renderer.render(this.scene, this.camera);
 	}
 }

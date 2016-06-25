@@ -21,6 +21,17 @@
 
         <canvas id="main-screen"></canvas>
 
+        <textarea id="distant-field-code">
+float distanceField(vec3 p) {
+    float sphere = spherePrimitive(p, 1.0);
+    float ground = boxPrimitive(p, vec3(0.8));
+
+    return transformIntersection(sphere, ground);
+}
+        </textarea>
+
+        <button class="render-button">Render</button>
+
         <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
         <script>window.jQuery || document.write('<script src="js/vendor/jquery-1.12.0.min.js"><\/script>')</script>
         <script src="js/vendor/three.min.js"></script>
@@ -38,15 +49,26 @@
                 });
 
                 renderer.addPointLight(
-                    new THREE.Vector3(2.0, 2.0, -2.0),
+                    new THREE.Vector3(1.0, 2.0, -2.0),
                     new THREE.Vector3(0.7, 0.7, 0.95)
                 );
                 renderer.addPointLight(
-                    new THREE.Vector3(-2.0, 0.0, -2.0),
+                    new THREE.Vector3(-1.0, 0.0, -2.0),
                     new THREE.Vector3(0.8, 0.55, 0.5)
                 );
 
-                renderer.compileShader('shaders/fragment.glsl');
+                renderer.setDistantFieldFunction($('#distant-field-code').val());
+
+                renderer.compile();
+
+                $('.render-button').on('click', function(e) {
+                    e.preventDefault();
+
+                    renderer.setDistantFieldFunction($('#distant-field-code').val());
+                    renderer.compile();
+                    
+                    return false;
+                });
             });
         </script>
     </body>

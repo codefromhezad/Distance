@@ -1,3 +1,6 @@
+
+/* SHADER UNIFORMS */
+
 uniform vec2 u_resolution;
 
 uniform vec3 u_camera_position;
@@ -10,18 +13,56 @@ uniform vec3 u_background_color;
 uniform vec3 u_point_lights_position[@var(num_point_lights)];
 uniform vec3 u_point_lights_color[@var(num_point_lights)];
 
+
+
+
+/* SHADER CONSTANTS */
+
 const float float_epsilon = 0.0001;
 const int maxSteps = 128;
 
-@import(shaders/lib/transformations.glsl)
-@import(shaders/lib/primitives.glsl)
 
-float distanceField(vec3 p) {
-    float sphere = spherePrimitive(p, 1.0);
-    float ground = boxPrimitive(p, vec3(0.7));
 
-    return transformUnion(sphere, ground);
+
+/* DISTANCE TRANSFORMATIONS */
+
+float transformUnion( float d1, float d2 ) {
+    return min(d1, d2);
 }
+
+float transformSubtraction( float d1, float d2 ) {
+    return max(-d1, d2);
+}
+
+float transformIntersection( float d1, float d2 ) {
+    return max(d1, d2);
+}
+
+
+
+
+// PRIMITIVES FUNCTIONS
+
+float spherePrimitive(vec3 p, float radius) {
+    return length(p) - radius;
+}
+
+float boxPrimitive( vec3 p, vec3 b ) {
+  vec3 d = abs(p) - b;
+  return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
+}
+
+
+
+
+/* DISTANT FIELD FUNCTION SETUP */
+
+@var(distant_field_function)
+
+
+
+
+/* LIGHTING / FUNCTIONS */
 
 vec3 calcNormal(vec3 pos) {
     vec3 eps = vec3( 0.001, 0.0, 0.0 );
@@ -34,8 +75,6 @@ vec3 calcNormal(vec3 pos) {
 }
 
 vec3 calcLightEquation(vec3 fieldPos) {
-
-    // Get Diffuse Contribution of lights
     vec3 diffuseContribution = vec3(0.0);
 
     for(int i = 0; i < @var(num_point_lights); i++) {
@@ -53,9 +92,13 @@ vec3 calcLightEquation(vec3 fieldPos) {
         diffuseContribution = diffuseContribution + lightColor * diffuse;
     }
 
-    // Return Diffuse + Ambiant Contributions
     return u_ambiant_light + diffuseContribution;
 }
+
+
+
+
+/* ENTRY POINT */
 
 void main() {
     vec3 cameraOrigin = u_camera_position;

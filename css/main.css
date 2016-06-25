@@ -95,16 +95,16 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
-.pane {
+#main-screen {
     float: left;
-    width: 50%;
 }
 
-.shader {
-    font-size: 14px;
+#distant-field-code {
+    display: block;
+    width: 600px;
+    height: 400px;
+    float: left;
 }
-
-
 
 
 
