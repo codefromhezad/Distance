@@ -62,6 +62,7 @@ float boxPrimitive( vec3 p, vec3 b ) {
 
 
 
+
 /* LIGHTING / FUNCTIONS */
 
 vec3 calcNormal(vec3 pos) {
