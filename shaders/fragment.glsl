@@ -13,6 +13,7 @@ uniform vec3 u_background_color;
 uniform vec3 u_point_lights_position[@var(num_point_lights)];
 uniform vec3 u_point_lights_color[@var(num_point_lights)];
 
+uniform float u_t;
 
 
 
@@ -22,6 +23,19 @@ const float float_epsilon = 0.0001;
 const int maxSteps = 128;
 
 
+/* ROTATION MATRIX HELPER */
+/* Source: http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/ */
+mat4 rotationMatrix(vec3 axis, float angle) {
+    axis = normalize(axis);
+    float s = sin(angle);
+    float c = cos(angle);
+    float oc = 1.0 - c;
+    
+    return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
+                oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
+                oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
+                0.0,                                0.0,                                0.0,                                1.0);
+}
 
 
 /* DISTANCE TRANSFORMATIONS */
@@ -42,14 +56,14 @@ float transformIntersection( float d1, float d2 ) {
 
 
 // PRIMITIVES FUNCTIONS
-
+// Source: http://iquilezles.org/
 float spherePrimitive(vec3 p, float radius) {
     return length(p) - radius;
 }
 
 float boxPrimitive( vec3 p, vec3 b ) {
-  vec3 d = abs(p) - b;
-  return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
+    vec3 d = abs(p) - b;
+    return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
 }
 
 
@@ -96,8 +110,6 @@ vec3 calcLightEquation(vec3 fieldPos) {
 
     return u_ambiant_light + diffuseContribution;
 }
-
-
 
 
 /* ENTRY POINT */

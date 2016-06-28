@@ -25,14 +25,26 @@
 
         <div class="code-zone">
             <textarea id="distant-field-code">
-float distanceField(vec3 p) {
-    vec3 c = vec3(1.4);
-    vec3 q = mod(p,c)-0.5*c;
+float inf = 999999.0;
 
-    float sphere = spherePrimitive(q, 1.0);
-    float ground = boxPrimitive(q, vec3(0.7));
-    
-    return transformSubtraction(sphere, ground);
+float distanceField(vec3 p) {
+    float d = boxPrimitive(p,vec3(1.0));
+
+    float s = 1.0;
+    for( int m=0; m<4; m++ ) {
+        vec3 a = mod( p*s, 2.0 )-1.0;
+        s *= 3.0;
+        vec3 r = abs(1.0 - 3.0*abs(a));
+
+        float da = max(r.x,r.y);
+        float db = max(r.y,r.z);
+        float dc = max(r.z,r.x);
+        float c = (min(da,min(db,dc))-1.0)/s;
+
+        d = max(d,c);
+    }
+
+    return d;
 }
             </textarea>
 
@@ -86,22 +98,31 @@ float opScale( vec3 p, float s )
                 renderer.init('main-screen', 600, 600);
 
                 renderer.setCamera({
-                    position: {x: 1.0, y: 1.0, z: -2.0},
-                    look_at: {x: 0.0, y: 0.0, z: 0.0}
+                    position: {x: -1.0, y: 0.0, z: 0.0},
+                    look_at: {x: 0.2, y: 0.2, z: 0.0}
                 });
 
                 renderer.addPointLight(
-                    new THREE.Vector3(1.0, 2.0, -2.0),
+                    new THREE.Vector3(1.0, 1.0, -1.0),
                     new THREE.Vector3(0.7, 0.7, 0.95)
                 );
                 renderer.addPointLight(
-                    new THREE.Vector3(-1.0, 0.0, -2.0),
+                    new THREE.Vector3(-1.0, 0.0, -1.0),
                     new THREE.Vector3(0.8, 0.55, 0.5)
                 );
 
                 renderer.setDistantFieldFunction($('#distant-field-code').val());
 
                 renderer.compile();
+
+                window.step = function() {
+                    renderer.shaderMaterial.uniforms.u_t.value += 0.01;
+                    renderer.shaderMaterial.uniforms.u_camera_position.value.x = 0.8 * Math.cos(renderer.shaderMaterial.uniforms.u_t.value);
+                    renderer.shaderMaterial.uniforms.u_camera_position.value.z = 0.8 * Math.sin(renderer.shaderMaterial.uniforms.u_t.value);
+                    renderer.compile();
+                }
+
+                setInterval( step, 250);
 
                 var editor = CodeMirror.fromTextArea($('#distant-field-code')[0], {
                     lineNumbers: true,

@@ -56,6 +56,9 @@ var ShaderRenderer = function() {
 
 		    u_point_lights_position: { type: 'v3v', value: []},
 		    u_point_lights_color: { type: 'v3v', value: []},
+
+		    /* General purpose uniforms (top help animating) */
+		    u_t: { type: 'f', value: 0},
 		};
 
 		/* Init shader material */
