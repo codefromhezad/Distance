@@ -11,8 +11,6 @@
         <!-- Place favicon.ico in the root directory -->
 
         <link rel="stylesheet" href="css/normalize.css">
-        <link rel="stylesheet" href="js/vendor/codemirror/lib/codemirror.css">
-        <link rel="stylesheet" href="js/vendor/codemirror/theme/monokai.css">
         <link rel="stylesheet" href="css/main.css">
         <script src="js/vendor/modernizr-2.8.3.min.js"></script>
     </head>
@@ -53,9 +51,10 @@
                 renderer.compile();
 
                 window.step = function() {
-                    renderer.shaderMaterial.uniforms.u_t.value += 0.01;
-                    renderer.shaderMaterial.uniforms.u_camera_position.value.x = 0.8 * Math.cos(renderer.shaderMaterial.uniforms.u_t.value);
-                    renderer.shaderMaterial.uniforms.u_camera_position.value.z = 0.8 * Math.sin(renderer.shaderMaterial.uniforms.u_t.value);
+                    renderer.shaderMaterial.uniforms.u_t.value += 0.005;
+                    renderer.shaderMaterial.uniforms.u_camera_position.value.x = 0.7 * Math.cos(renderer.shaderMaterial.uniforms.u_t.value);
+                    renderer.shaderMaterial.uniforms.u_camera_position.value.z = 0.7 * Math.sin(renderer.shaderMaterial.uniforms.u_t.value);
+                    renderer.shaderMaterial.uniforms.u_camera_position.value.y = 0.7 * Math.sin(renderer.shaderMaterial.uniforms.u_t.value);
                     
                     renderer.renderer.render(renderer.scene, renderer.camera);
 

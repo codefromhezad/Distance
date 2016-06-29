@@ -9,6 +9,8 @@ uniform vec3 u_camera_up;
 
 uniform vec3 u_ambiant_light;
 uniform vec3 u_background_color;
+uniform vec3 u_fog_color;
+uniform float u_fog_attenuation;
 
 uniform vec3 u_point_lights_position[@var(num_point_lights)];
 uniform vec3 u_point_lights_color[@var(num_point_lights)];
@@ -74,6 +76,12 @@ float boxPrimitive( vec3 p, vec3 b ) {
 float inf = 999999.0;
 
 float distanceField(vec3 p) {
+
+    // DOmain repetition
+    vec3 repeat = vec3(3.0, 3.0, 3.0);
+    p = mod(p, repeat) - 0.5 * repeat;
+
+    // Menger
     float d = boxPrimitive(p,vec3(1.0));
 
     float s = 1.0;
@@ -90,7 +98,7 @@ float distanceField(vec3 p) {
         d = max(d,c);
     }
 
-    return transformSubtraction(boxPrimitive(p, vec3(0.5 + 0.5 * cos(u_t))), d);
+    return d;
 }
 
 
@@ -109,7 +117,7 @@ vec3 calcNormal(vec3 pos) {
     return normalize(nor);
 }
 
-vec3 calcLightEquation(vec3 fieldPos) {
+vec3 calcLightEquation(vec3 fieldPos, float total_dist) {
     vec3 diffuseContribution = vec3(0.0);
 
     for(int i = 0; i < @var(num_point_lights); i++) {
@@ -128,7 +136,12 @@ vec3 calcLightEquation(vec3 fieldPos) {
         diffuseContribution = diffuseContribution + lightColor * diffuse;
     }
 
-    return u_ambiant_light + diffuseContribution;
+    vec3 finalColor = u_ambiant_light + diffuseContribution;
+
+    // Apply fog
+    finalColor = mix(finalColor, u_fog_color, (1.0 - exp(-total_dist * u_fog_attenuation)));
+
+    return finalColor;
 }
 
 
@@ -148,7 +161,7 @@ void main() {
 
     vec3 rayDir = normalize(cameraRight * screenPos.x + cameraUp * screenPos.y + cameraDir);
 
-    vec3 color = u_background_color;
+    vec3 color = mix(u_background_color, u_fog_color, (1.0 - exp(-999999.0 * u_fog_attenuation)));
 
     float total_dist = 0.0;
     
@@ -159,7 +172,7 @@ void main() {
         float d = distanceField(p);
 
         if(d < float_epsilon) {
-            color = calcLightEquation(p);
+            color = calcLightEquation(p, total_dist);
             break;
         }
 
