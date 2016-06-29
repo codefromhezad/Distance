@@ -97,7 +97,7 @@ vec3 calcLightEquation(vec3 fieldPos) {
         vec3 lightColor = u_point_lights_color[i];
 
         vec3 lightVector = normalize(lightPos - fieldPos);
-
+        
         vec3 normal = calcNormal(fieldPos);
 
         float distance = length(lightPos - fieldPos);

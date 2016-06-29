@@ -119,10 +119,12 @@ float opScale( vec3 p, float s )
                     renderer.shaderMaterial.uniforms.u_t.value += 0.01;
                     renderer.shaderMaterial.uniforms.u_camera_position.value.x = 0.8 * Math.cos(renderer.shaderMaterial.uniforms.u_t.value);
                     renderer.shaderMaterial.uniforms.u_camera_position.value.z = 0.8 * Math.sin(renderer.shaderMaterial.uniforms.u_t.value);
-                    renderer.compile();
-                }
+                    
+                    renderer.renderer.render(renderer.scene, renderer.camera);
 
-                setInterval( step, 250);
+                    window.requestAnimationFrame(step);
+                }
+                window.requestAnimationFrame(step);
 
                 var editor = CodeMirror.fromTextArea($('#distant-field-code')[0], {
                     lineNumbers: true,
