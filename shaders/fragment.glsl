@@ -90,7 +90,7 @@ float distanceField(vec3 p) {
         d = max(d,c);
     }
 
-    return d;
+    return transformSubtraction(boxPrimitive(p, vec3(0.5 + 0.5 * cos(u_t))), d);
 }
 
 
