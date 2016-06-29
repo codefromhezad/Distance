@@ -50,9 +50,9 @@ var ShaderRenderer = function() {
 
 		    /* World lighting uniforms */
 		    u_background_color: { type: 'vec3', value: {x: 0.05, y: 0.04, z: 0.03}},
-		    u_fog_color: { type: 'vec3', value: {x: 0.5, y: 0.6, z: 0.7}},
+		    u_fog_color: { type: 'vec3', value: {x: 0.2, y: 0.3, z: 0.4}},
 		    u_fog_attenuation: { type: 'f', value: 0.1 },
-		    
+
 		    /* Actual lighting uniforms */
 		    u_ambiant_light: { type: 'vec3', value: {x: 0.1, y: 0.1, z: 0.15} },
 
